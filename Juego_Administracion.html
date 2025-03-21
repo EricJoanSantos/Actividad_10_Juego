@@ -1,0 +1,672 @@
+<html lang="en"><!--iniciamos la programación en html--><head>
+    <meta charset="utf-8">
+    <!-- meta tag para no hacer zoom in/out en un móvil --> 
+    <!-- meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" / -->
+    <title>GalaxyGem</title>
+    <style type="text/css">
+         /* eliminar márgenes y espaciado del body  */
+	   	body { margin: 0; padding: 0; background: #000000; }
+    </style>
+  </head>
+  <body> 
+    <script src="phaser.min.js">
+       //agregando el framework phaser
+    </script>
+    <!--código del juego -->
+    <script>
+    
+      var TeclaPresionada=false;
+      var MeteoritosTotales = 80; //cantidad de meteoritos animados
+      var MeteoritosIndestructibles=20;
+      var EstrellasTotales =75;  //cantidad de estrellas animadas en fondo
+      //var SaludNave = 100; //salud de la nave
+      var GemasTotales=30; //total de gemas a recolectar
+      EstadosGalaxyGem = {
+       //funcion de inicialización
+      init: function() {
+        GalaxyGem.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL; //el juego se ajusta a la ventana
+        GalaxyGem.scale.pageAlignHorizontally = true; //alienacion horizontal activada
+        GalaxyGem.scale.pageAlignVertically = true; //alienación vertical activada
+        this.BIMPresionado = false; // el juego inicia cuando haces clic BIM
+        this.MeteoritosImpactados = 0; //inicializar contador de meteoritos
+        this.JuegoTerminado = false; //Interruptor que termina el juego si es true
+        //this.countSmile = -1; //no se
+      },
+      //cargar todas las imágenes no importa el orden
+      preload: function() {
+        GalaxyGem.load.image('fondo', 'img/fondo.jpg');
+        GalaxyGem.load.image('nave','img/nave.png');
+        GalaxyGem.load.image('nave1','img/nave1.png');
+        GalaxyGem.load.image('nave2','img/nave2.png');
+        GalaxyGem.load.image('nave3','img/nave3.png');
+        GalaxyGem.load.image('nave4','img/nave4.png');
+        GalaxyGem.load.image('meteoritos','img/meteorito.png');
+        GalaxyGem.load.image('meteoritos2','img/meteorito2.png');
+        GalaxyGem.load.image('explosion','img/explosion.png');
+        GalaxyGem.load.image('explosion2','img/explosion2.png');
+        GalaxyGem.load.image('galaxia','img/galaxia.png');
+        //GalaxyGem.load.image('platilloarriba','img/platilloarriba.png');
+        GalaxyGem.load.image('estrella1','img/estrella1.png');
+        GalaxyGem.load.image('estrella2','img/estrella2.png');
+        GalaxyGem.load.image('estrella3','img/estrella3.png');
+        GalaxyGem.load.image('gema','img/gema.png');
+        GalaxyGem.load.image('proyectil','img/proyectil.png');
+        GalaxyGem.load.audio('sndboom','snd/sndboom.mp3');
+        GalaxyGem.load.audio('sndboom2','snd/sndboom2.mp3');
+        GalaxyGem.load.audio('sndruby','snd/sndruby.mp3');
+        GalaxyGem.load.audio('sndnave','snd/sndnave.mp3');
+        GalaxyGem.load.audio('sndfondo','snd/sndfondo.mp3');
+        GalaxyGem.load.audio('sndganaste','snd/sndganaste.mp3');
+        GalaxyGem.load.audio('sndperdiste','snd/sndperdiste.mp3');
+       },
+      //poner los objetos en pantalla la primer linea es el objeto mas abajo
+      create: function() {
+    
+      //  var SpaceBar = this.input.keyboard.addKey(Phaser.input.keyboard.KeyCodes.SPACE);
+        GalaxyGem.add.sprite(0, 0,'fondo'); //agregamos el fondo
+        //this.platilloarriba = this.add.sprite(500, 150, 'platilloarriba');
+        //this.platilloarriba.anchor.setTo(0.5);
+        //this.platilloarriba.scale.setTo(0.3);
+        //parámetros de la galaxia que gira
+        this.galaxia = this.add.sprite(GalaxyGem.width/2,GalaxyGem.height/2,'galaxia');
+        this.galaxia.anchor.setTo (0.5);
+        this.galaxia.alpha= 0.7;
+        this.galaxia.scale.setTo(2);
+        this.sndboom = GalaxyGem.add.audio('sndboom');
+        this.sndboom2 = GalaxyGem.add.audio('sndboom2');
+        this.sndruby = GalaxyGem.add.audio('sndruby');
+        this.sndnave = GalaxyGem.add.audio('sndnave');
+        this.sndfondo = GalaxyGem.add.audio('sndfondo');
+        this.sndganaste = GalaxyGem.add.audio('sndganaste');
+        this.sndperdiste = GalaxyGem.add.audio('sndperdiste');
+        //this.platilloabajo = this.add.sprite(GalaxyGem.rnd.IntRng(-1600,-800), GalaxyGem.height-150, 'platilloabajo');  
+        //creación y distribución de las estrellas de fondo
+        this.EstrellasArray = [];
+        for(var i=0; i<EstrellasTotales; i++){
+            var PosX = GalaxyGem.rnd.IntRng(1, 1200); //posiciones en x
+            var PosY = GalaxyGem.rnd.IntRng(1, 700);  // posiciones en y
+            var estrellas = GalaxyGem.add.sprite(PosX, PosY, 'estrella' + GalaxyGem.rnd.IntRng(1,3));
+            estrellas.vel = 1 + GalaxyGem.rnd.frac() * 3; //velocidad de las estrellas
+            estrellas.alpha = GalaxyGem.rnd.frac()+1;    // transparencia aleatoria
+            estrellas.scale.setTo( 0.3 + GalaxyGem.rnd.frac()/4 ); //escala aleatoria de las estrellas
+            this.EstrellasArray[i] = estrellas; //asignación del vector
+          }
+          //creacion y distribucion de todas las gemas
+        this.GemasArray = [];
+        for(var i=0; i<GemasTotales; i++){
+            var PosX = GalaxyGem.rnd.IntRng(1, 1200);
+            var PosY = GalaxyGem.rnd.IntRng(-4000,0);
+            var Gemas = GalaxyGem.add.sprite(PosX, PosY, 'gema');
+            Gemas.anchor.setTo(0.5);
+            Gemas.vel = 1 + GalaxyGem.rnd.frac() * 5; //velocidad de las estrellas
+            //Gemas.scale.setTo( 0.5 + GalaxyGem.rnd.frac()); //escala aleatoria de las estrellas
+            this.GemasArray[i] = Gemas; //asignación del vector
+           }
+        this.proyectil = this.add.image(GalaxyGem.width/2,GalaxyGem.height/2,'proyectil');
+        this.proyectil.anchor.setTo(0.5);
+        this.proyectil.scale.setTo(0.7);
+        this.proyectil.anchor.setTo(0.5); 
+        //parámetros de la nave protagonista 
+
+        this.nave4 = this.add.image(0,0,'nave4');
+        //this.nave.frame = 0;
+        this.nave4.x = GalaxyGem.width/2;
+        this.nave4.y = GalaxyGem.height/2;
+        this.nave4.anchor.setTo(0.5);
+
+        this.nave3 = this.add.image(0,0,'nave3');
+        //this.nave.frame = 0;
+        this.nave3.x = GalaxyGem.width/2;
+        this.nave3.y = GalaxyGem.height/2;
+        this.nave3.anchor.setTo(0.5);
+
+        this.nave2 = this.add.image(0,0,'nave2');
+        //this.nave.frame = 0;
+        this.nave2.x = GalaxyGem.width/2;
+        this.nave2.y = GalaxyGem.height/2;
+        this.nave2.anchor.setTo(0.5);
+        
+        this.nave1 = this.add.image(0,0,'nave1');
+        //this.nave.frame = 0;
+        this.nave1.x = GalaxyGem.width/2;
+        this.nave1.y = GalaxyGem.height/2;
+        this.nave1.anchor.setTo(0.5);
+        
+        this.nave = this.add.image(0,0,'nave');
+        //this.nave.frame = 0;
+        this.nave.x = GalaxyGem.width/2;
+        this.nave.y = GalaxyGem.height/2;
+        this.nave.anchor.setTo(0.5);
+
+        this.nave1.visible=false;
+        this.nave2.visible=false;
+        this.nave3.visible=false;
+        this.nave4.visible=false;
+          
+     
+
+        GalaxyGem.input.onDown.add(this.onTap, this);
+        this.sndperdiste.stop();
+        this.sndganaste.stop();
+
+      this.sndfondo.loop = true;
+      this.sndfondo.volume = 0.2;
+      this.sndfondo.play();
+    
+
+      
+        // creación del vector de los meteoritos
+        this.meteoritos = [];
+        for(var i=0; i<MeteoritosTotales; i++){
+            var meteorito = GalaxyGem.add.sprite(0,0,'meteoritos');
+           // meteorito.frame = GalaxyGem.rnd.IntRng(0,3);  solo si utiliza varios metoritos con spritesheet
+            meteorito.scale.setTo( 0.3 + GalaxyGem.rnd.frac()*1.2); //escala aleatoria
+            meteorito.anchor.setTo(0.5); //esablecer centro
+            meteorito.x = GalaxyGem.rnd.IntRng(1, 1270); //posición aleatoria de inicio
+            meteorito.y = GalaxyGem.rnd.IntRng(-1900, 0);
+            meteorito.vel = 3 + GalaxyGem.rnd.frac() * 7; //velocidad de los meteoritos
+            this.meteoritos[i] = meteorito;
+           /*
+            var rectCurrenmeteorito = this.getBoundsmeteorito(meteorito);
+            var rectnave = this.getBoundsmeteorito(this.nave);
+             para que no colisionen los meteoritos entre si o con la nave
+            while(this.isOverlapingOthermeteorito(i, rectCurrenmeteorito) || this.isRectanglesOverlapping(rectnave, rectCurrenmeteorito) ){
+                meteorito.x = GalaxyGem.rnd.IntRng(1, 1366);
+                meteorito.y = GalaxyGem.rnd.IntRng(-800, 0);
+                rectCurrenmeteorito = this.getBoundsmeteorito(meteorito);
+            }
+           */
+        } 
+
+
+        this.MeteoritosIndestructibles = [];
+        for(var i=0; i<MeteoritosIndestructibles; i++){
+            var MeteoritoIndestructible = GalaxyGem.add.sprite(0,0,'meteoritos2');
+           // meteorito.frame = GalaxyGem.rnd.IntRng(0,3);  solo si utiliza varios metoritos con spritesheet
+            MeteoritoIndestructible.scale.setTo( 0.3 + GalaxyGem.rnd.frac()*1.2); //escala aleatoria
+            MeteoritoIndestructible.anchor.setTo(0.5); //esablecer centro
+            MeteoritoIndestructible.x = GalaxyGem.rnd.IntRng(1, 1270); //posición aleatoria de inicio
+            MeteoritoIndestructible.y = GalaxyGem.rnd.IntRng(-700, 0);
+            MeteoritoIndestructible.vel = 3 + GalaxyGem.rnd.frac() * 7; //velocidad de los meteoritos
+            this.MeteoritosIndestructibles[i] = MeteoritoIndestructible;
+         } 
+        //crear las explosiones
+        this.explosionGroup = GalaxyGem.add.group();
+        
+        for(var i=0; i<10; i++){
+            this.explosion = this.explosionGroup.create(100,100,'explosion');
+            this.explosion.tweenScale = GalaxyGem.add.tween(this.explosion.scale).to({
+                            x: [0.5, 1, 0.7],
+                            y: [0.5, 1, 0.7]
+                }, 600, Phaser.Easing.Exponential.Out, false, 0, 0, false);
+
+            this.explosion.tweenAlpha = GalaxyGem.add.tween(this.explosion).to({
+                            alpha: [1, 0.6, 0.2]
+                }, 600, Phaser.Easing.Exponential.Out, false, 0, 0, false);
+            this.explosion.anchor.setTo(0.5);
+            
+            this.explosion.kill();
+        }
+       
+        this.explosionGroup2 = GalaxyGem.add.group();
+        //for(var i=0; i<2; i++){
+            this.explosion = this.explosionGroup2.create(100,100,'explosion2');
+            this.explosion.tweenScale = GalaxyGem.add.tween(this.explosion.scale).to({
+                            x: [0.5, 1.3, 0.7],
+                            y: [0.5, 1.3, 0.7]
+                }, 600, Phaser.Easing.Exponential.Out, false, 0, 0, false);
+            this.explosion.tweenAlpha = GalaxyGem.add.tween(this.explosion).to({
+                            alpha: [1, 0.6, 0.2]
+                }, 600, Phaser.Easing.Exponential.Out, false, 0, 0, false);
+            this.explosion.anchor.setTo(0.5);
+           
+            this.explosion.kill();
+        //crear el rectangulo donde van los puntajes y vida
+        var bgAlpha1 = GalaxyGem.add.bitmapData(GalaxyGem.width, 50);
+        bgAlpha1.ctx.fillStyle = '#000000';
+        bgAlpha1.ctx.fillRect(0,0,GalaxyGem.width,50);
+        var bg1 = GalaxyGem.add.sprite(0,0,bgAlpha1);
+        bg1.alpha = 0.7;
+        this.currentScore = 0;
+          var style = {
+              font: 'bold 20pt Arial',
+              fill: '#FFEE58',
+              align: 'center'
+            }
+          this.PuntajeActualGema= 0;
+          var style2 = {
+              font: 'bold 20pt Arial',
+              fill: '#EF5350',
+              align: 'center'
+            }
+          var style3 = {
+              font: 'bold 20pt Arial',
+              fill: '#42A5F5',
+              align: 'center'
+            }
+          this.PuntajeGem = GalaxyGem.add.text(GalaxyGem.width/2, 30, 'Gemas: 0/30', style2);
+          this.PuntajeGem.anchor.setTo(0.5);
+          this.SaludActualNave = 100; //salud de la nave
+          this.TextoSaludNave = GalaxyGem.add.text(150, 30, '  Salud: 100', style);
+          this.TextoSaludNave.anchor.setTo(0.5);
+          this.totalTime = 60;
+          this.timerText = GalaxyGem.add.text(GalaxyGem.width-200, 30, 'Tiempo: '+this.totalTime, style3);
+          this.timerText.anchor.setTo(0.5);
+          this.timerGameOver = GalaxyGem.time.events.loop(Phaser.Timer.SECOND, function(){
+          if(this.BIMPresionado){
+            this.sndfondo.volume = 0.7;
+                this.totalTime--;
+                this.timerText.text = 'Tiempo: '+this.totalTime+'';
+                if(this.totalTime<=0){
+                    GalaxyGem.time.events.remove(this.timerGameOver);
+                    this.JuegoTerminado = true;
+                    this.sndfondo.stop();
+                    this.showFinalMessage('PERDISTE! \n Tiempo Agotado \n presiona F5 para Reiniciar');
+                    this.sndperdiste.play();
+                    //this.BIMPresionado=false;
+                  }
+            }
+        },this);
+        
+       // var TeclaProyectil;
+      //TeclaProyectil= this.input.keyboard.addKeys('A');
+       //var KeyA = this.input.keyboard.addKey(Phaser.input.keyboard.KeyCodes.SPACE);
+       this.cursor = this.input.keyboard.createCursorKeys(); //para mover la nave
+       //this.FUEGO=this.input.keyboard.addKey(Phaser.Input.keyboard.KeyCodes.X);   
+       //this.fuego = this.input.keyboard.Phaser.input.keyb    
+    },
+    
+   increaseScore:function(){
+      this.sndnave.play();
+      this.TextoSaludNave.text='Salud: '+this.SaludActualNave;
+      //this.PuntajeGem.text = 'Gemas: '+this.PuntajeActualGema;
+      this.MeteoritosImpactados += 1;
+      if(this.SaludActualNave <= 0){
+            GalaxyGem.time.events.remove(this.timerGameOver);
+            this.JuegoTerminado = true;
+            this.sndfondo.stop();
+            this.showFinalMessage('PERDISTE! \n Los meteoritos te aniquilaron \n presiona F5 para Reiniciar'); 
+            //this.BIMPresionado=false;       
+            this.sndperdiste.play();         
+        }
+    },
+
+    GemasPuntajeIncremento:function(){
+      this.sndruby.play();
+      this.PuntajeActualGema+=1;
+      this.PuntajeGem.text = 'Gemas: '+this.PuntajeActualGema+'/30';
+      this.TextoSaludNave.text='Salud: '+this.SaludActualNave;
+      this.GemasCapturadas     += 1;
+      if(this.PuntajeActualGema >= GemasTotales){
+            GalaxyGem.time.events.remove(this.timerGameOver);
+            this.JuegoTerminado = true;
+            this.sndfondo.stop();
+            this.showFinalMessage('GANASTE! \n Capturaste todas las Gemas \n presiona F5 para Reiniciar');
+            //this.BIMPresionado=false;
+            this.sndganaste.play();
+        }
+    },
+    //cuadros alpha que ocupan toda la pantalla cuando termina el juego
+    showFinalMessage:function(msg){
+     // this.tweenplatilloarriba.stop();
+      var bgAlpha = GalaxyGem.add.bitmapData(GalaxyGem.width,GalaxyGem.height);
+      if (this.PuntajeActualGema>=10){
+        bgAlpha.ctx.fillStyle = '#000000';
+      }
+      if (this.totalTime<=0){
+        bgAlpha.ctx.fillStyle = '#000000';
+      }
+      if (this.SaludActualNave <= 0){
+        bgAlpha.ctx.fillStyle = '#000000';
+      }
+      bgAlpha.ctx.fillRect(0,0,GalaxyGem.width, GalaxyGem.height);
+      var bg = GalaxyGem.add.sprite(0,0,bgAlpha);
+      bg.alpha = 0.3;
+      
+        
+        if (this.PuntajeActualGema>=10){
+          var style = {
+            font: 'bold 40pt Arial',
+            fill: '#fff178',
+            align: 'center'
+          }
+      }
+      if (this.totalTime<=0){
+        var style = {
+            font: 'bold 40pt Arial',
+            fill: '#4fc3f7',
+            align: 'center'
+        }
+      }
+      if (this.SaludActualNave <= 0){
+        var style = {
+            font: 'bold 40pt Arial',
+            fill: '#ff7043',
+            align: 'center'
+        }
+      }
+
+
+
+      this.textFieldFinalMsg = GalaxyGem.add.text(GalaxyGem.width/2, GalaxyGem.height/2, msg, style);
+      this.textFieldFinalMsg.anchor.setTo(0.5);
+     // alert("Pulse ACEPTAR para continuar...");
+       //       location.reload();
+    },
+    onTap:function(){
+      this.BIMPresionado = true;
+      
+    }, 
+    getBoundsmeteorito:function(currentmeteorito){
+      return new Phaser.Rectangle(currentmeteorito.left, currentmeteorito.top, currentmeteorito.width, currentmeteorito.height);
+    },
+    getBoundsGemas:function(currentGema){
+      return new Phaser.Rectangle(currentGema.left, currentGema.top, currentGema.width, currentGema.height);
+    },
+
+    isRectanglesOverlapping: function(rect1, rect2) {
+      if(rect1.x> rect2.x+rect2.width || rect2.x> rect1.x+rect1.width){
+          return false;
+        }
+      if(rect1.y> rect2.y+rect2.height || rect2.y> rect1.y+rect1.height){
+            return false;
+        }
+      return true;
+    },
+/*
+    isOverlapingOthermeteorito:function(index, rect2){
+      for(var i=0; i<index; i++){
+          var rect1 = this.getBoundsmeteorito(this.meteoritos[i]);
+          if(this.isRectanglesOverlapping(rect1, rect2)){
+              return true;
+            }
+        }
+      return false;
+    },
+
+    isOverlapingOtherGema:function(index, rect2){
+      for(var i=0; i<index; i++){
+          var rect1 = this.getBoundsGemas(this.GemasArray[i]);
+          if(this.isRectanglesOverlapping(rect1, rect2)){
+              return true;
+            }
+        }
+      return false;
+    },
+*/
+    getBoundsnave:function(){
+      var x0 = this.nave.x - Math.abs(this.nave.width)/4;
+      var width = Math.abs(this.nave.width)/2;
+      var y0 = this.nave.y - this.nave.height/2;
+      var height = this.nave.height;
+      return new Phaser.Rectangle(x0+20, y0+20,width-30,height-30);
+    },
+
+    getBounsProyectil:function(){
+      var x0 = this.proyectil.x - Math.abs(this.proyectil.width)/4;
+      var width = Math.abs(this.proyectil.width)/2;
+      var y0 = this.proyectil.y - this.proyectil.height/2;
+      var height = this.proyectil.height;
+      return new Phaser.Rectangle(x0+5, y0+5,width-5,height-5);
+    },
+/*
+       render:function(){
+        GalaxyGem.debug.spriteBounds(this.nave); // colision nave
+        for(var i=0; i<MeteoritosTotales; i++){
+        GalaxyGem.debug.spriteBounds(this.meteoritos[i]); // colision meteorito
+        }
+        for(var i=0; i<GemasTotales; i++){
+            GalaxyGem.debug.spriteBounds(this.GemasArray[i]);  //colision meteorito
+            }
+        },
+  */
+
+
+        //////////////////////////////////////////////////////////////////////
+    update: function() {
+      //var SpaceBar = this.input.keyboard.addKeys(Phaser.input.keyboard.KeyCodes.SPACE);
+      //var TeclaPresionada = event.keyCode;
+      // asignación de teclas para desplazar la nave
+      
+          if(this.BIMPresionado && !this.JuegoTerminado){
+
+          this.nave.visible=true;
+          this.nave1.visible=false;
+          this.nave2.visible=false;
+          this.nave3.visible=false;
+          this.nave4.visible=false;
+
+          var pointerX=GalaxyGem.input.x;
+          var pointerY=GalaxyGem.input.y-30;
+
+          var distX=pointerX-this.nave.x;
+          var distY=pointerY-this.nave.y;
+
+          if (distX>0){
+           
+                  this.nave.visible=false;
+                  this.nave2.visible=true;
+                  this.nave2.x=this.nave.x;
+                  this.nave2.y=this.nave.y;
+
+          }else{
+           
+                this.nave.visible=false;
+                this.nave3.visible=true;
+                this.nave3.x=this.nave.x;
+                this.nave3.y=this.nave.y;
+          }
+
+          if (distY>0){
+           /*  this.nave.visible=false;
+                    this.nave4.visible=true;
+                    this.nave4.y=this.nave.y;
+                    this.nave4.x=this.nave.x; */
+           
+           
+
+   }else{
+    this.nave.visible=false;
+    this.nave1.visible=true;
+    this.nave1.y=this.nave.y;
+    this.nave1.x=this.nave.x;
+                   
+   }
+          
+          this.nave.x +=distX*0.7;
+          this.nave.y +=distY*0.7;
+
+          if (this.cursor.right.isDown && this.nave.x+this.nave.width/2<=GalaxyGem.width ) {
+                  //this.nave.x+=7;
+                  this.nave.x+=10;
+                  this.nave.visible=false;
+                  this.nave2.visible=true;
+                  this.nave2.x=this.nave.x;
+                  this.nave2.y=this.nave.y;
+           } 
+          else if (this.cursor.left.isDown && this.nave.x>=this.nave.width/2) {
+                this.nave.x-=10;
+                this.nave.visible=false;
+                this.nave3.visible=true;
+                this.nave3.x=this.nave.x;
+                this.nave3.y=this.nave.y;
+           }
+          else if (this.cursor.up.isDown && this.nave.y>=this.nave.height/2) {
+                    this.nave.y-=10;
+                    this.nave.visible=false;
+                    this.nave1.visible=true;
+                    this.nave1.y=this.nave.y;
+                    this.nave1.x=this.nave.x;
+           }
+          else if (this.cursor.down.isDown && this.nave.y+this.nave.height/2<=GalaxyGem.height) {
+                    this.nave.y+=10;
+                    this.nave.visible=false;
+                    this.nave4.visible=true;
+                    this.nave4.y=this.nave.y;
+                    this.nave4.x=this.nave.x;
+          }
+          if (true)  {
+                  this.proyectil.y=this.proyectil.y-25;
+                  this.proyectil.x+=Math.cos(this.proyectil.y/45)*10; 
+                  if (this.proyectil.y<0){
+                    this.proyectil.y=this.nave.y-90;
+                     this.proyectil.x=this.nave.x;
+                  }
+         }
+       //var codigo = event.keyCode;
+          // var pointerX = GalaxyGem.input.x;
+           //  var pointerY = GalaxyGem.input.y;
+           //  var distX = pointerX - this.nave.x;
+           //  var distY = pointerY - this.nave.y;
+          //   if(distX>0){
+          //    this.nave.scale.setTo(1,1);
+          // }else{
+          //    this.nave.scale.setTo(-1,1);
+          // }
+          // this.nave.x += distX * 0.07;
+           // this.nave.y += distY * 0.07;
+           for(var i=0; i<EstrellasTotales; i++){
+                var estrellas = this.EstrellasArray[i];
+                estrellas.y += estrellas.vel;
+                // estrellas.x += GalaxyGem.rnd.IntRng(-0.2,0.2); movimiento erratico en x
+                if(estrellas.y > GalaxyGem.height+50){
+                    estrellas.y = GalaxyGem.rnd.IntRng(-200,0);
+                    estrellas.x = GalaxyGem.rnd.IntRng(1,1270);
+                }
+            }
+            for(var i=0; i<MeteoritosTotales; i++){
+                var meteorito1 = this.meteoritos[i];
+                // var erraticox =  GalaxyGem.rnd.IntRng(1,750);
+                meteorito1.y += meteorito1.vel; //+GalaxyGem.rnd.frac() * 7;
+                /*
+                if ((meteorito1.y >= erraticox) && (meteorito1.y <= erraticox+10)) {
+                    meteorito1.x += GalaxyGem.rnd.IntRng(-35,35);
+                } */
+                if(meteorito1.y > GalaxyGem.height+100){
+                    meteorito1.y = GalaxyGem.rnd.IntRng(-300,0);
+                    meteorito1.x = GalaxyGem.rnd.IntRng(1,1270);
+                }
+            }
+            for(var i=0; i<MeteoritosIndestructibles; i++){
+                var meteorito2 = this.MeteoritosIndestructibles[i];
+                // var erraticox =  GalaxyGem.rnd.IntRng(1,750);
+                meteorito2.y += meteorito2.vel; //+GalaxyGem.rnd.frac() * 7;
+                /*
+                if ((meteorito1.y >= erraticox) && (meteorito1.y <= erraticox+10)) {
+                    meteorito1.x += GalaxyGem.rnd.IntRng(-35,35);
+                } */
+                if(meteorito2.y > GalaxyGem.height+100){
+                    meteorito2.y = GalaxyGem.rnd.IntRng(-300,0);
+                    meteorito2.x = GalaxyGem.rnd.IntRng(1,1270);
+                }
+            }
+            for(var i=0; i<GemasTotales; i++){
+                var Gema1 = this.GemasArray[i];
+                // var erraticox =  GalaxyGem.rnd.IntRng(1,750);
+                Gema1.y += Gema1.vel; //+GalaxyGem.rnd.frac() * 7;
+                /*
+                if ((meteorito1.y >= erraticox) && (meteorito1.y <= erraticox+10)) {
+                    meteorito1.x += GalaxyGem.rnd.IntRng(-35,35);
+                } */
+                if(Gema1.y > GalaxyGem.height+500){
+                    Gema1.y = GalaxyGem.rnd.IntRng(-500,100);
+                    Gema1.x = GalaxyGem.rnd.IntRng(1,1250);
+                }
+            }
+            this.galaxia.angle +=0.3;
+        
+            for(var i=0; i<MeteoritosTotales; i++){
+                var rectnave = this.getBoundsnave();
+                var rectmeteorito = this.getBoundsmeteorito(this.meteoritos[i]);
+                if(this.meteoritos[i].visible && this.isRectanglesOverlapping(rectnave, rectmeteorito)){
+                  this.SaludActualNave-=Math.trunc(this.meteoritos[i].scale.x*5);
+                  if (this.SaludActualNave<=0){
+                    this.SaludActualNave=0;
+                  }                
+                   this.increaseScore();
+                    this.meteoritos[i].visible = false;
+                    var explosion = this.explosionGroup.getFirstDead();
+                    if(explosion!=null){
+                        explosion.reset(this.meteoritos[i].x, this.meteoritos[i].y);
+                        explosion.tweenScale.start();
+                        explosion.tweenAlpha.start();
+                        explosion.tweenAlpha.onComplete.add(function (currentTarget, currentTween) {
+                            currentTarget.kill();
+                                          
+                            //this.meteoritos[i].visible = true;
+                        }, this);
+                    }
+                }
+            }
+           for(var i=0; i<MeteoritosIndestructibles; i++){
+                var rectnave = this.getBoundsnave();
+                var rectmeteorito = this.getBoundsmeteorito(this.MeteoritosIndestructibles[i]);
+                if(this.MeteoritosIndestructibles[i].visible && this.isRectanglesOverlapping(rectnave, rectmeteorito)){
+                  this.SaludActualNave-=Math.trunc(this.MeteoritosIndestructibles[i].scale.x*7);
+                  if (this.SaludActualNave<=0){
+                     this.SaludActualNave=0;
+                  }                
+                   this.increaseScore();
+                  
+                    this.MeteoritosIndestructibles[i].visible = false;
+                    this.sndboom.play();
+                    var explosion = this.explosionGroup.getFirstDead();
+                    if(explosion!=null){
+                        explosion.reset(this.MeteoritosIndestructibles[i].x, this.MeteoritosIndestructibles[i].y);
+                        explosion.tweenScale.start();
+                        explosion.tweenAlpha.start();
+                        explosion.tweenAlpha.onComplete.add(function (currentTarget, currentTween) {
+                            currentTarget.kill();
+                            
+                        }, this);
+                    }
+                }
+            }
+            for(var i=0; i<MeteoritosTotales; i++){
+                var rectProyectil = this.getBounsProyectil();
+                var rectmeteorito = this.getBoundsmeteorito(this.meteoritos[i]);
+                
+                if(this.meteoritos[i].visible && this.isRectanglesOverlapping(rectProyectil, rectmeteorito)){
+                    this.meteoritos[i].visible = false;
+                    this.sndboom.play();
+                    var explosion = this.explosionGroup.getFirstDead();
+                    if(explosion!=null){
+                        explosion.reset(this.proyectil.x, this.proyectil.y);
+                        explosion.tweenScale.start();
+                        explosion.tweenAlpha.start();
+                        explosion.tweenAlpha.onComplete.add(function (currentTarget, currentTween) {
+                            currentTarget.kill();
+                        }, this);
+                    }
+                }
+            }
+            for(var i=0; i<GemasTotales; i++){
+                var rectnave = this.getBoundsnave();
+                var rectGemas = this.getBoundsGemas(this.GemasArray[i]);
+                if(this.GemasArray[i].visible && this.isRectanglesOverlapping(rectnave, rectGemas)){
+                    this.GemasPuntajeIncremento();
+                    this.SaludActualNave+=1;
+                    this.GemasArray[i].visible = false;
+                    var explosion = this.explosionGroup2.getFirstDead();
+                    if(explosion!=null){
+                        explosion.reset(this.GemasArray[i].x, this.GemasArray[i].y);
+                        explosion.tweenScale.start();
+                        explosion.tweenAlpha.start();
+                        explosion.tweenAlpha.onComplete.add(function (currentTarget, currentTween) {
+                        currentTarget.kill();
+                      
+                      }, this);
+                    }
+                }
+           }
+        }
+    }
+  }
+  var GalaxyGem = new Phaser.Game(1280, 720, Phaser.CANVAS);
+      GalaxyGem.state.add("MiJuegoGG", EstadosGalaxyGem);
+      GalaxyGem.state.start("MiJuegoGG");
+
+    </script>  
+  
+</body>
+</html>
