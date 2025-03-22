@@ -91,40 +91,10 @@
         this.proyectil.anchor.setTo(0.5); 
         //parámetros de la nave protagonista 
 
-        this.nave4 = this.add.image(0,0,'nave4');
-        //this.nave.frame = 0;
-        this.nave4.x = GalaxyGem.width/2;
-        this.nave4.y = GalaxyGem.height/2;
-        this.nave4.anchor.setTo(0.5);
-
-        this.nave3 = this.add.image(0,0,'nave3');
-        //this.nave.frame = 0;
-        this.nave3.x = GalaxyGem.width/2;
-        this.nave3.y = GalaxyGem.height/2;
-        this.nave3.anchor.setTo(0.5);
-
-        this.nave2 = this.add.image(0,0,'nave2');
-        //this.nave.frame = 0;
-        this.nave2.x = GalaxyGem.width/2;
-        this.nave2.y = GalaxyGem.height/2;
-        this.nave2.anchor.setTo(0.5);
-        
-        this.nave1 = this.add.image(0,0,'nave1');
-        //this.nave.frame = 0;
-        this.nave1.x = GalaxyGem.width/2;
-        this.nave1.y = GalaxyGem.height/2;
-        this.nave1.anchor.setTo(0.5);
-        
-        this.nave = this.add.image(0,0,'nave');
-        //this.nave.frame = 0;
-        this.nave.x = GalaxyGem.width/2;
-        this.nave.y = GalaxyGem.height/2;
+       // Crear UNA sola nave
+        this.nave = this.add.image(GalaxyGem.width / 2, GalaxyGem.height / 2, 'nave');
         this.nave.anchor.setTo(0.5);
 
-        this.nave1.visible=false;
-        this.nave2.visible=false;
-        this.nave3.visible=false;
-        this.nave4.visible=false;
           
      
 
@@ -403,80 +373,59 @@
       
           if(this.BIMPresionado && !this.JuegoTerminado){
 
-          this.nave.visible=true;
-          this.nave1.visible=false;
-          this.nave2.visible=false;
-          this.nave3.visible=false;
-          this.nave4.visible=false;
+         
 
           var pointerX=GalaxyGem.input.x;
           var pointerY=GalaxyGem.input.y-30;
 
           var distX=pointerX-this.nave.x;
-          var distY=pointerY-this.nave.y;
+            var distY=pointerY-this.nave.y;
 
-          if (distX>0){
-           
-                  this.nave.visible=false;
-                  this.nave2.visible=true;
-                  this.nave2.x=this.nave.x;
-                  this.nave2.y=this.nave.y;
+            if (distX > 0) {
+          this.nave.loadTexture('nave2'); // Imagen hacia la derecha
+      } else {
+          this.nave.loadTexture('nave3'); // Imagen hacia la izquierda
+      }
 
-          }else{
-           
-                this.nave.visible=false;
-                this.nave3.visible=true;
-                this.nave3.x=this.nave.x;
-                this.nave3.y=this.nave.y;
-          }
+      if (distY > 0) {
+          this.nave.loadTexture('nave4'); // Imagen hacia abajo
+      } else {
+          this.nave.loadTexture('nave1'); // Imagen hacia arriba
+      }
 
-          if (distY>0){
-           /*  this.nave.visible=false;
-                    this.nave4.visible=true;
-                    this.nave4.y=this.nave.y;
-                    this.nave4.x=this.nave.x; */
-           
-           
 
-   }else{
-    this.nave.visible=false;
-    this.nave1.visible=true;
-    this.nave1.y=this.nave.y;
-    this.nave1.x=this.nave.x;
-                   
-   }
+          if (distX > 0) {
+            this.nave.loadTexture('nave2'); // Imagen hacia la derecha
+        } else {
+            this.nave.loadTexture('nave3'); // Imagen hacia la izquierda
+        }
+
+        if (distY > 0) {
+            this.nave.loadTexture('nave4'); // Imagen hacia abajo
+        } else {
+            this.nave.loadTexture('nave1'); // Imagen hacia arriba
+        }
+
           
           this.nave.x +=distX*0.7;
           this.nave.y +=distY*0.7;
 
-          if (this.cursor.right.isDown && this.nave.x+this.nave.width/2<=GalaxyGem.width ) {
-                  //this.nave.x+=7;
-                  this.nave.x+=10;
-                  this.nave.visible=false;
-                  this.nave2.visible=true;
-                  this.nave2.x=this.nave.x;
-                  this.nave2.y=this.nave.y;
-           } 
-          else if (this.cursor.left.isDown && this.nave.x>=this.nave.width/2) {
-                this.nave.x-=10;
-                this.nave.visible=false;
-                this.nave3.visible=true;
-                this.nave3.x=this.nave.x;
-                this.nave3.y=this.nave.y;
-           }
-          else if (this.cursor.up.isDown && this.nave.y>=this.nave.height/2) {
-                    this.nave.y-=10;
-                    this.nave.visible=false;
-                    this.nave1.visible=true;
-                    this.nave1.y=this.nave.y;
-                    this.nave1.x=this.nave.x;
-           }
-          else if (this.cursor.down.isDown && this.nave.y+this.nave.height/2<=GalaxyGem.height) {
-                    this.nave.y+=10;
-                    this.nave.visible=false;
-                    this.nave4.visible=true;
-                    this.nave4.y=this.nave.y;
-                    this.nave4.x=this.nave.x;
+         // Movimiento con teclas
+          if (this.cursor.right.isDown) {
+              this.nave.x += 10;
+              this.nave.loadTexture('nave2');
+          } 
+          if (this.cursor.left.isDown) {
+              this.nave.x -= 10;
+              this.nave.loadTexture('nave3');
+          } 
+          if (this.cursor.up.isDown) {
+              this.nave.y -= 10;
+              this.nave.loadTexture('nave1');
+          } 
+          if (this.cursor.down.isDown) {
+              this.nave.y += 10;
+              this.nave.loadTexture('nave4');
           }
           if (true)  {
                   this.proyectil.y=this.proyectil.y-25;
