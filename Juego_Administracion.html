@@ -9,9 +9,8 @@
     </style>
   </head>
   <body> 
-    <script src="phaser.min.js">
-       //agregando el framework phaser
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@2.6.2/build/phaser.min.js"></script>
+
     <!--código del juego -->
     <script>
     
@@ -35,25 +34,24 @@
       //cargar todas las imágenes no importa el orden
       preload: function() {
         GalaxyGem.load.image('fondo', 'Imagenes/fondo.jpg');
-        GalaxyGem.load.image('nave','Imagenes/nave.png');
-        GalaxyGem.load.image('nave1','Imagenes/nave1.png');
-        GalaxyGem.load.image('nave2','Imagenes/nave2.png');
-        GalaxyGem.load.image('nave3','Imagenes/nave3.png');
-        GalaxyGem.load.image('nave4','Imagenes/nave4.png');
-        GalaxyGem.load.image('meteoritos','Imagenes/meteorito.png');
-        GalaxyGem.load.image('meteoritos2','Imagenes/meteorito2.png');
+        GalaxyGem.load.image('nave','Imagenes/heroe izquierda.png');
+        GalaxyGem.load.image('nave1','Imagenes/heroe destruye.png');
+        GalaxyGem.load.image('nave2','Imagenes/heroe derecha.png');
+        GalaxyGem.load.image('nave3','Imagenes/heroe izquierda.png');
+        GalaxyGem.load.image('nave4','Imagenes/heroe destruye.png');
+        GalaxyGem.load.image('meteoritos','Imagenes/avion.png');
         GalaxyGem.load.image('explosion','Imagenes/explosion.png');
         GalaxyGem.load.image('explosion2','Imagenes/explosion2.png');
         //GalaxyGem.load.image('platilloarriba','img/platilloarriba.png');
         GalaxyGem.load.image('gema','Imagenes/gema.png');
-        GalaxyGem.load.image('proyectil','Imagenes/proyectil.png');
-        GalaxyGem.load.audio('sndboom','snd/sndboom.mp3');
-        GalaxyGem.load.audio('sndboom2','snd/sndboom2.mp3');
-        GalaxyGem.load.audio('sndruby','snd/sndruby.mp3');
-        GalaxyGem.load.audio('sndnave','snd/sndnave.mp3');
-        GalaxyGem.load.audio('sndfondo','snd/sndfondo.mp3');
-        GalaxyGem.load.audio('sndganaste','snd/sndganaste.mp3');
-        GalaxyGem.load.audio('sndperdiste','snd/sndperdiste.mp3');
+        GalaxyGem.load.image('proyectil','Imagenes/rayo.png');
+        GalaxyGem.load.audio('sndboom','Sonidos/sndboom.mp3');
+        GalaxyGem.load.audio('sndboom2','Sonidos/sndboom2.mp3');
+        GalaxyGem.load.audio('sndruby','Sonidos/sndruby.mp3');
+        GalaxyGem.load.audio('sndnave','Sonidos/sndheroe.mp3');
+        GalaxyGem.load.audio('sndfondo','Sonidos/sndfondo.mp3');
+        GalaxyGem.load.audio('sndganaste','Sonidos/sndganaste.mp3');
+        GalaxyGem.load.audio('sndperdiste','Sonidos/sndperdiste.mp3');
        },
       //poner los objetos en pantalla la primer linea es el objeto mas abajo
       create: function() {
@@ -64,10 +62,7 @@
         //this.platilloarriba.anchor.setTo(0.5);
         //this.platilloarriba.scale.setTo(0.3);
         //parámetros de la galaxia que gira
-        this.galaxia = this.add.sprite(GalaxyGem.width/2,GalaxyGem.height/2,'galaxia');
-        this.galaxia.anchor.setTo (0.5);
-        this.galaxia.alpha= 0.7;
-        this.galaxia.scale.setTo(2);
+        
         this.sndboom = GalaxyGem.add.audio('sndboom');
         this.sndboom2 = GalaxyGem.add.audio('sndboom2');
         this.sndruby = GalaxyGem.add.audio('sndruby');
@@ -75,15 +70,15 @@
         this.sndfondo = GalaxyGem.add.audio('sndfondo');
         this.sndganaste = GalaxyGem.add.audio('sndganaste');
         this.sndperdiste = GalaxyGem.add.audio('sndperdiste');
-        //this.platilloabajo = this.add.sprite(GalaxyGem.rnd.IntRng(-1600,-800), GalaxyGem.height-150, 'platilloabajo');  
+        //this.platilloabajo = this.add.sprite(GalaxyGem.rnd.integerInRange(-1600,-800), GalaxyGem.height-150, 'platilloabajo');  
         //creación y distribución de las estrellas de fondo
         this.EstrellasArray = [];
         
           //creacion y distribucion de todas las gemas
         this.GemasArray = [];
         for(var i=0; i<GemasTotales; i++){
-            var PosX = GalaxyGem.rnd.IntRng(1, 1200);
-            var PosY = GalaxyGem.rnd.IntRng(-4000,0);
+            var PosX = GalaxyGem.rnd.integerInRange(1, 1200);
+            var PosY = GalaxyGem.rnd.integerInRange(-4000,0);
             var Gemas = GalaxyGem.add.sprite(PosX, PosY, 'gema');
             Gemas.anchor.setTo(0.5);
             Gemas.vel = 1 + GalaxyGem.rnd.frac() * 5; //velocidad de las estrellas
@@ -147,11 +142,11 @@
         this.meteoritos = [];
         for(var i=0; i<MeteoritosTotales; i++){
             var meteorito = GalaxyGem.add.sprite(0,0,'meteoritos');
-           // meteorito.frame = GalaxyGem.rnd.IntRng(0,3);  solo si utiliza varios metoritos con spritesheet
+           // meteorito.frame = GalaxyGem.rnd.integerInRange(0,3);  solo si utiliza varios metoritos con spritesheet
             meteorito.scale.setTo( 0.3 + GalaxyGem.rnd.frac()*1.2); //escala aleatoria
             meteorito.anchor.setTo(0.5); //esablecer centro
-            meteorito.x = GalaxyGem.rnd.IntRng(1, 1270); //posición aleatoria de inicio
-            meteorito.y = GalaxyGem.rnd.IntRng(-1900, 0);
+            meteorito.x = GalaxyGem.rnd.integerInRange(1, 1270); //posición aleatoria de inicio
+            meteorito.y = GalaxyGem.rnd.integerInRange(-1900, 0);
             meteorito.vel = 3 + GalaxyGem.rnd.frac() * 7; //velocidad de los meteoritos
             this.meteoritos[i] = meteorito;
            /*
@@ -159,25 +154,15 @@
             var rectnave = this.getBoundsmeteorito(this.nave);
              para que no colisionen los meteoritos entre si o con la nave
             while(this.isOverlapingOthermeteorito(i, rectCurrenmeteorito) || this.isRectanglesOverlapping(rectnave, rectCurrenmeteorito) ){
-                meteorito.x = GalaxyGem.rnd.IntRng(1, 1366);
-                meteorito.y = GalaxyGem.rnd.IntRng(-800, 0);
+                meteorito.x = GalaxyGem.rnd.integerInRange(1, 1366);
+                meteorito.y = GalaxyGem.rnd.integerInRange(-800, 0);
                 rectCurrenmeteorito = this.getBoundsmeteorito(meteorito);
             }
            */
         } 
 
 
-        this.MeteoritosIndestructibles = [];
-        for(var i=0; i<MeteoritosIndestructibles; i++){
-            var MeteoritoIndestructible = GalaxyGem.add.sprite(0,0,'meteoritos2');
-           // meteorito.frame = GalaxyGem.rnd.IntRng(0,3);  solo si utiliza varios metoritos con spritesheet
-            MeteoritoIndestructible.scale.setTo( 0.3 + GalaxyGem.rnd.frac()*1.2); //escala aleatoria
-            MeteoritoIndestructible.anchor.setTo(0.5); //esablecer centro
-            MeteoritoIndestructible.x = GalaxyGem.rnd.IntRng(1, 1270); //posición aleatoria de inicio
-            MeteoritoIndestructible.y = GalaxyGem.rnd.IntRng(-700, 0);
-            MeteoritoIndestructible.vel = 3 + GalaxyGem.rnd.frac() * 7; //velocidad de los meteoritos
-            this.MeteoritosIndestructibles[i] = MeteoritoIndestructible;
-         } 
+        
         //crear las explosiones
         this.explosionGroup = GalaxyGem.add.group();
         
@@ -513,55 +498,34 @@
           // }
           // this.nave.x += distX * 0.07;
            // this.nave.y += distY * 0.07;
-           for(var i=0; i<EstrellasTotales; i++){
-                var estrellas = this.EstrellasArray[i];
-                estrellas.y += estrellas.vel;
-                // estrellas.x += GalaxyGem.rnd.IntRng(-0.2,0.2); movimiento erratico en x
-                if(estrellas.y > GalaxyGem.height+50){
-                    estrellas.y = GalaxyGem.rnd.IntRng(-200,0);
-                    estrellas.x = GalaxyGem.rnd.IntRng(1,1270);
-                }
-            }
+           
             for(var i=0; i<MeteoritosTotales; i++){
                 var meteorito1 = this.meteoritos[i];
-                // var erraticox =  GalaxyGem.rnd.IntRng(1,750);
+                // var erraticox =  GalaxyGem.rnd.integerInRange(1,750);
                 meteorito1.y += meteorito1.vel; //+GalaxyGem.rnd.frac() * 7;
                 /*
                 if ((meteorito1.y >= erraticox) && (meteorito1.y <= erraticox+10)) {
-                    meteorito1.x += GalaxyGem.rnd.IntRng(-35,35);
+                    meteorito1.x += GalaxyGem.rnd.integerInRange(-35,35);
                 } */
                 if(meteorito1.y > GalaxyGem.height+100){
-                    meteorito1.y = GalaxyGem.rnd.IntRng(-300,0);
-                    meteorito1.x = GalaxyGem.rnd.IntRng(1,1270);
+                    meteorito1.y = GalaxyGem.rnd.integerInRange(-300,0);
+                    meteorito1.x = GalaxyGem.rnd.integerInRange(1,1270);
                 }
             }
-            for(var i=0; i<MeteoritosIndestructibles; i++){
-                var meteorito2 = this.MeteoritosIndestructibles[i];
-                // var erraticox =  GalaxyGem.rnd.IntRng(1,750);
-                meteorito2.y += meteorito2.vel; //+GalaxyGem.rnd.frac() * 7;
-                /*
-                if ((meteorito1.y >= erraticox) && (meteorito1.y <= erraticox+10)) {
-                    meteorito1.x += GalaxyGem.rnd.IntRng(-35,35);
-                } */
-                if(meteorito2.y > GalaxyGem.height+100){
-                    meteorito2.y = GalaxyGem.rnd.IntRng(-300,0);
-                    meteorito2.x = GalaxyGem.rnd.IntRng(1,1270);
-                }
-            }
+            
             for(var i=0; i<GemasTotales; i++){
                 var Gema1 = this.GemasArray[i];
-                // var erraticox =  GalaxyGem.rnd.IntRng(1,750);
+                // var erraticox =  GalaxyGem.rnd.integerInRange(1,750);
                 Gema1.y += Gema1.vel; //+GalaxyGem.rnd.frac() * 7;
                 /*
                 if ((meteorito1.y >= erraticox) && (meteorito1.y <= erraticox+10)) {
-                    meteorito1.x += GalaxyGem.rnd.IntRng(-35,35);
+                    meteorito1.x += GalaxyGem.rnd.integerInRange(-35,35);
                 } */
                 if(Gema1.y > GalaxyGem.height+500){
-                    Gema1.y = GalaxyGem.rnd.IntRng(-500,100);
-                    Gema1.x = GalaxyGem.rnd.IntRng(1,1250);
+                    Gema1.y = GalaxyGem.rnd.integerInRange(-500,100);
+                    Gema1.x = GalaxyGem.rnd.integerInRange(1,1250);
                 }
             }
-            this.galaxia.angle +=0.3;
         
             for(var i=0; i<MeteoritosTotales; i++){
                 var rectnave = this.getBoundsnave();
@@ -586,30 +550,7 @@
                     }
                 }
             }
-           for(var i=0; i<MeteoritosIndestructibles; i++){
-                var rectnave = this.getBoundsnave();
-                var rectmeteorito = this.getBoundsmeteorito(this.MeteoritosIndestructibles[i]);
-                if(this.MeteoritosIndestructibles[i].visible && this.isRectanglesOverlapping(rectnave, rectmeteorito)){
-                  this.SaludActualNave-=Math.trunc(this.MeteoritosIndestructibles[i].scale.x*7);
-                  if (this.SaludActualNave<=0){
-                     this.SaludActualNave=0;
-                  }                
-                   this.increaseScore();
-                  
-                    this.MeteoritosIndestructibles[i].visible = false;
-                    this.sndboom.play();
-                    var explosion = this.explosionGroup.getFirstDead();
-                    if(explosion!=null){
-                        explosion.reset(this.MeteoritosIndestructibles[i].x, this.MeteoritosIndestructibles[i].y);
-                        explosion.tweenScale.start();
-                        explosion.tweenAlpha.start();
-                        explosion.tweenAlpha.onComplete.add(function (currentTarget, currentTween) {
-                            currentTarget.kill();
-                            
-                        }, this);
-                    }
-                }
-            }
+           
             for(var i=0; i<MeteoritosTotales; i++){
                 var rectProyectil = this.getBounsProyectil();
                 var rectmeteorito = this.getBoundsmeteorito(this.meteoritos[i]);
