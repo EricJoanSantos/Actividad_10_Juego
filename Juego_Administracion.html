@@ -44,11 +44,7 @@
         GalaxyGem.load.image('meteoritos2','img/meteorito2.png');
         GalaxyGem.load.image('explosion','img/explosion.png');
         GalaxyGem.load.image('explosion2','img/explosion2.png');
-        GalaxyGem.load.image('galaxia','img/galaxia.png');
         //GalaxyGem.load.image('platilloarriba','img/platilloarriba.png');
-        GalaxyGem.load.image('estrella1','img/estrella1.png');
-        GalaxyGem.load.image('estrella2','img/estrella2.png');
-        GalaxyGem.load.image('estrella3','img/estrella3.png');
         GalaxyGem.load.image('gema','img/gema.png');
         GalaxyGem.load.image('proyectil','img/proyectil.png');
         GalaxyGem.load.audio('sndboom','snd/sndboom.mp3');
@@ -82,15 +78,7 @@
         //this.platilloabajo = this.add.sprite(GalaxyGem.rnd.IntRng(-1600,-800), GalaxyGem.height-150, 'platilloabajo');  
         //creación y distribución de las estrellas de fondo
         this.EstrellasArray = [];
-        for(var i=0; i<EstrellasTotales; i++){
-            var PosX = GalaxyGem.rnd.IntRng(1, 1200); //posiciones en x
-            var PosY = GalaxyGem.rnd.IntRng(1, 700);  // posiciones en y
-            var estrellas = GalaxyGem.add.sprite(PosX, PosY, 'estrella' + GalaxyGem.rnd.IntRng(1,3));
-            estrellas.vel = 1 + GalaxyGem.rnd.frac() * 3; //velocidad de las estrellas
-            estrellas.alpha = GalaxyGem.rnd.frac()+1;    // transparencia aleatoria
-            estrellas.scale.setTo( 0.3 + GalaxyGem.rnd.frac()/4 ); //escala aleatoria de las estrellas
-            this.EstrellasArray[i] = estrellas; //asignación del vector
-          }
+        
           //creacion y distribucion de todas las gemas
         this.GemasArray = [];
         for(var i=0; i<GemasTotales; i++){
