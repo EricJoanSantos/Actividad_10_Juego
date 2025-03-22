@@ -15,7 +15,7 @@
     <script>
     
       var TeclaPresionada=false;
-      var MeteoritosTotales = 80; //cantidad de meteoritos animados
+      var MeteoritosTotales = 90; //cantidad de meteoritos animados
       var MeteoritosIndestructibles=20;
       var EstrellasTotales =75;  //cantidad de estrellas animadas en fondo
       //var SaludNave = 100; //salud de la nave
@@ -75,16 +75,16 @@
         this.EstrellasArray = [];
         
           //creacion y distribucion de todas las gemas
-        this.GemasArray = [];
+          this.GemasArray = [];
         for(var i=0; i<GemasTotales; i++){
             var PosX = GalaxyGem.rnd.integerInRange(1, 1200);
             var PosY = GalaxyGem.rnd.integerInRange(-4000,0);
             var Gemas = GalaxyGem.add.sprite(PosX, PosY, 'gema');
-            Gemas.anchor.setTo(0.5);
-            Gemas.vel = 1 + GalaxyGem.rnd.frac() * 5; //velocidad de las estrellas
-            //Gemas.scale.setTo( 0.5 + GalaxyGem.rnd.frac()); //escala aleatoria de las estrellas
-            this.GemasArray[i] = Gemas; //asignación del vector
-           }
+            Gemas.anchor.setTo(0.5); // Centro del sprite para mejor rotación/colisión
+            Gemas.scale.setTo(0.3);  // Tamaño uniforme y reducido (30% del original)
+            Gemas.vel = 1 + GalaxyGem.rnd.frac() * 5;
+            this.GemasArray[i] = Gemas;
+}
         this.proyectil = this.add.image(GalaxyGem.width/2,GalaxyGem.height/2,'proyectil');
         this.proyectil.anchor.setTo(0.5);
         this.proyectil.scale.setTo(0.7);
